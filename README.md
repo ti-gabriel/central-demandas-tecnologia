@@ -7,6 +7,7 @@ e o acompanhamento do ciclo de vida de demandas de Tecnologia.
 
 ## Arquitetura
 
+```mermaid
 flowchart TD
     A[Microsoft Forms] --> B[Power Automate]
     B --> C[SharePoint - Tabela de Roteamento]
@@ -20,6 +21,7 @@ flowchart TD
     H --> I[New]
     I --> J[Doing]
     J --> K[Done / Closed]
+```
 
    
 ## 🎯 Problema
@@ -66,3 +68,63 @@ Após o envio de uma demanda:
 - REST APIs
 - JSON
 - OData
+
+## 🧠 Decisões de Arquitetura
+
+### Roteamento parametrizado
+
+Uma das principais decisões da solução foi evitar que as regras de
+roteamento ficassem diretamente acopladas ao fluxo principal.
+
+Em vez de manter múltiplas condições para determinar o destino de cada
+produto, foi criada uma tabela de configuração responsável por armazenar
+os parâmetros necessários para o direcionamento das demandas.
+
+Entre os parâmetros utilizados estão:
+
+- Produto
+- Projeto de destino
+- Time responsável
+- Tipo de Work Item
+- Area Path
+- Iteration Path
+- Identificação do time
+- Identificação do canal de comunicação
+- Status da configuração
+
+O Power Automate consulta essa configuração durante a execução e utiliza
+os dados retornados para determinar dinamicamente o destino da solicitação.
+
+Essa abordagem reduz o acoplamento entre regra de negócio e automação,
+facilita a manutenção e permite incorporar novos produtos e destinos
+com menor impacto sobre os fluxos existentes.
+
+## 🔄 Sincronização com o Azure DevOps
+
+A Central de Tickets não funciona apenas como histórico de abertura.
+
+Alterações relevantes no Work Item são processadas pela automação e
+refletidas na base central de acompanhamento.
+
+### New
+
+O ticket é registrado após sua criação no Azure DevOps.
+
+### Doing
+
+Ao iniciar o atendimento, são atualizados:
+
+- Status atual
+- Responsável atual
+- Data de início do atendimento
+
+### Done / Closed
+
+No encerramento, são registrados:
+
+- Status final
+- Responsável no encerramento
+- Data de encerramento
+
+As atualizações são incrementais, preservando as informações registradas
+nas etapas anteriores do ciclo de vida.
