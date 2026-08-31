@@ -1,8 +1,20 @@
 # 🚀 Central de Demandas de Tecnologia
 
-> **Case técnico de automação, integração e orquestração de demandas.**
+> Case técnico de automação, integração, orquestração e observabilidade de demandas de Tecnologia.
 
-Solução desenvolvida para centralizar a abertura, o roteamento automático e o acompanhamento do ciclo de vida de demandas de Tecnologia, integrando **Microsoft Forms, Power Automate, SharePoint, Azure DevOps, Microsoft Teams e Outlook**.
+# 💡 Solução desenvolvida para centralizar e automatizar o ciclo de vida de demandas de Tecnologia, desde a abertura da solicitação até o acompanhamento operacional por indicadores.
+
+A arquitetura integra **Microsoft Forms, Power Automate, SharePoint / Microsoft Lists, Azure DevOps, Microsoft Teams, Outlook e Power BI**, permitindo:
+
+- Padronização da entrada de solicitações;
+- Roteamento automático para diferentes produtos, squads e boards;
+- Criação dinâmica de Work Items no Azure DevOps;
+- Comunicação automática com solicitantes e equipes responsáveis;
+- Sincronização das principais transições do ciclo de atendimento;
+- Centralização dos dados operacionais em uma base estruturada;
+- Monitoramento das demandas por meio de dashboards no Power BI.
+
+A solução foi estruturada com foco em **baixo acoplamento, rastreabilidade, parametrização, escalabilidade e observabilidade operacional**.
 
 > 🔐 **Nota de segurança:** este repositório apresenta uma versão demonstrativa e sanitizada da arquitetura. Dados corporativos, credenciais, identificadores sensíveis, URLs internas e informações de usuários ou clientes não fazem parte deste projeto.
 
@@ -10,62 +22,72 @@ Solução desenvolvida para centralizar a abertura, o roteamento automático e o
 
 ## 🎯 Problema
 
-O processo de abertura e direcionamento de demandas de Tecnologia pode envolver diferentes produtos, squads e boards, aumentando a dependência de conhecimento operacional para identificar corretamente qual time deve receber cada solicitação.
+O processo de abertura e acompanhamento de demandas de Tecnologia pode envolver diferentes produtos, squads e boards, aumentando a dependência de conhecimento operacional para identificar corretamente qual time deve receber cada solicitação.
 
-Além do roteamento, também existia a necessidade de:
+Além do roteamento, existia a necessidade de estruturar todo o ciclo de atendimento, garantindo rastreabilidade desde a abertura da demanda até sua conclusão.
+
+Os principais desafios identificados foram:
 
 - Padronizar a entrada das solicitações;
-- Reduzir direcionamentos manuais;
+- Reduzir direcionamentos e atividades manuais;
+- Direcionar automaticamente cada demanda para o squad e board responsável;
 - Manter o solicitante informado durante o atendimento;
-- Centralizar informações das demandas;
-- Registrar responsáveis e datas importantes;
-- Acompanhar o ciclo de vida dos Work Items;
-- Criar uma base estruturada para indicadores futuros.
+- Centralizar informações das demandas em uma única base operacional;
+- Registrar responsáveis, status e datas relevantes do atendimento;
+- Acompanhar as principais transições do ciclo de vida dos Work Items;
+- Transformar os dados operacionais em indicadores para acompanhamento das demandas;
+- Disponibilizar uma visão consolidada para análise por produto, squad, status, urgência, área solicitante e período.
 
-A solução foi desenvolvida para centralizar essa entrada e automatizar o direcionamento das solicitações utilizando parâmetros previamente configurados.
-
----
-
-# 💡 Solução
-
-A **Central de Demandas de Tecnologia** utiliza uma camada de roteamento parametrizada para identificar dinamicamente o destino de cada solicitação.
-
-Após o envio de uma demanda:
-
-1. O formulário recebe e padroniza os dados da solicitação;
-2. O Power Automate consulta a tabela de roteamento;
-3. O produto selecionado determina projeto, time, tipo de Work Item e demais parâmetros;
-4. O Work Item é criado automaticamente no Azure DevOps;
-5. O identificador gerado é utilizado como protocolo e chave de correlação;
-6. O solicitante recebe a confirmação da abertura;
-7. O time responsável é notificado no Microsoft Teams;
-8. A solicitação é registrada na Central de Tickets;
-9. Alterações relevantes no Work Item são processadas;
-10. A Central de Tickets é atualizada de acordo com o estado da demanda;
-11. O solicitante recebe novas comunicações conforme o atendimento evolui.
+A solução foi desenvolvida para reduzir essas dependências operacionais através de uma arquitetura integrada e parametrizada, conectando o processo de entrada, roteamento, atendimento, rastreabilidade e observabilidade das demandas.
 
 ---
 
-# 🏗️ Arquitetura
+# 🏗️ Arquitetura da Solução
 
 A solução conecta diferentes componentes do ecossistema Microsoft para formar um fluxo único de atendimento:
 
 ```mermaid
 flowchart TD
 
-    A[Board A] --> PA[Fluxo Pai A]
-    B[Board B] --> PB[Fluxo Pai B]
-    C[Board C] --> PC[Fluxo Pai C]
-    D[Board D] --> PD[Fluxo Pai D]
+    %% Boards monitorados
+    A[Azure DevOps<br/>Board A]
+    B[Azure DevOps<br/>Board B]
+    C[Azure DevOps<br/>Board C]
+    D[Azure DevOps<br/>Board D]
 
+    %% Fluxos específicos por board
+    A --> PA[Fluxo Pai A]
+    B --> PB[Fluxo Pai B]
+    C --> PC[Fluxo Pai C]
+    D --> PD[Fluxo Pai D]
+
+    %% Processamento compartilhado
     PA --> F[Fluxo Filho Compartilhado]
     PB --> F
     PC --> F
     PD --> F
 
-    F --> S[Central de Tickets]
+    %% Atualizações operacionais
+    F --> S[Central de Tickets<br/>SharePoint / Microsoft Lists]
     F --> T[Microsoft Teams]
-    F --> M[E-mail]
+    F --> M[Outlook<br/>Notificação ao Solicitante]
+
+    %% Camada de observabilidade
+    S --> BI[Modelo Semântico<br/>Power BI]
+    BI --> DB[Dashboard Operacional<br/>Central de Demandas]
+
+    %% Estilos
+    classDef devops fill:#0078D4,color:#fff,stroke:#005A9E
+    classDef automate fill:#0066FF,color:#fff,stroke:#004DB3
+    classDef data fill:#038387,color:#fff,stroke:#026A6D
+    classDef communication fill:#6264A7,color:#fff,stroke:#464775
+    classDef analytics fill:#F2C811,color:#1F2937,stroke:#C9A500
+
+    class A,B,C,D devops
+    class PA,PB,PC,PD,F automate
+    class S data
+    class T,M communication
+    class BI,DB analytics
 ```
 
 ### Visão geral da solução
@@ -73,6 +95,34 @@ flowchart TD
 ![Arquitetura Geral da Central de Demandas](docs/arquitetura-geral.png)
 
 A arquitetura separa **entrada, configuração, processamento, gestão do atendimento e comunicação**, reduzindo o acoplamento entre as diferentes etapas.
+
+---
+
+# 📊 Dashboard Operacional — Power BI
+
+A Central de Tickets também funciona como fonte consolidada para a camada analítica da solução.
+
+Os dados estruturados no SharePoint / Microsoft Lists são consumidos por um **modelo semântico no Power BI**, permitindo transformar as informações geradas durante o ciclo de atendimento em indicadores operacionais.
+
+O dashboard permite acompanhar:
+
+- Volume total de demandas;
+- Demandas novas, em atuação e concluídas;
+- Distribuição por produto;
+- Distribuição por squad;
+- Distribuição por status;
+- Demandas por nível de urgência;
+- Demandas por área solicitante;
+- Evolução das demandas ao longo do tempo;
+- Análise interativa através de filtros por diferentes dimensões.
+
+A atualização dos dados é realizada de forma agendada, mantendo a camada analítica sincronizada periodicamente com a Central de Tickets.
+
+### Visão operacional
+
+![Dashboard Operacional - Power BI](docs/power-bi-dashboard-operacional.png)
+
+> 🔐 Os dados apresentados na evidência foram utilizados exclusivamente para demonstração da arquitetura, sem exposição de informações corporativas sensíveis.
 
 ---
 
@@ -310,19 +360,28 @@ Essa abordagem reduz atualizações desnecessárias e evita sobrescrever informa
 
 ---
 
-# 🧩 Arquitetura dos fluxos
+# 🧩 Arquitetura dos Fluxos
 
-A solução utiliza uma separação entre fluxos responsáveis por observar diferentes boards e uma camada compartilhada responsável pelo processamento das atualizações.
+A arquitetura utiliza uma separação entre os fluxos responsáveis por monitorar diferentes boards do Azure DevOps e uma camada compartilhada responsável pelo processamento das atualizações do ciclo de vida das demandas.
+
+Cada board possui seu próprio fluxo de captura de eventos, enquanto as regras comuns de processamento permanecem centralizadas em um fluxo compartilhado.
+lo processamento das atualizações.
 
 ```text
 Board Projetos de Crédito ──────┐
 Board Gestão de Carteira ───────┤
 Board CLT ──────────────────────┤
-Board Cessão / Regulatórios ────┼──► Processamento Compartilhado
+Board Cessão / Regulatórios ────┼──► Fluxo Filho Compartilhado
 Board Suporte N2 ───────────────┘             │
                                               ├──► Central de Tickets
+                                              │        │
+                                              │        └──► Power BI
+                                              │               │
+                                              │               └──► Dashboard Operacional
+                                              │
                                               ├──► Microsoft Teams
-                                              └──► E-mail
+                                              │
+                                              └──► E-mail ao Solicitante
 ```
 
 Essa abordagem permite incorporar novos destinos reutilizando a lógica comum já existente.
@@ -430,91 +489,187 @@ Isso permite que a mesma arquitetura seja utilizada por diferentes equipes sem c
 
 # 🧠 Decisões de Arquitetura
 
-## 1. Roteamento fora do fluxo principal
+As principais decisões foram tomadas buscando reduzir acoplamento, facilitar a manutenção e permitir que a solução evolua sem concentrar todas as responsabilidades em um único fluxo.
 
-As configurações de destino são mantidas separadamente da lógica principal da automação.
+## 1. Roteamento parametrizado fora do fluxo principal
 
-**Benefício:** menor acoplamento e manutenção simplificada.
+As configurações responsáveis por relacionar produtos, projetos, squads e destinos são mantidas separadamente da lógica principal da automação.
+
+**Benefício:** novos destinos podem ser incorporados com menor necessidade de alteração na lógica central, reduzindo acoplamento e simplificando a manutenção.
 
 ---
 
 ## 2. WorkItemId como chave de correlação
 
-O identificador do Azure DevOps é armazenado na Central de Tickets e utilizado para localizar posteriormente o registro relacionado.
+O identificador gerado pelo Azure DevOps é armazenado na Central de Tickets e utilizado como referência para localizar posteriormente o registro correspondente durante as atualizações do ciclo de vida.
 
-**Benefício:** sincronização entre diferentes plataformas sem depender do título ou de outras informações mutáveis.
+**Benefício:** cria uma correlação consistente entre Azure DevOps e SharePoint sem depender de títulos, nomes ou outras informações mutáveis.
 
 ---
 
 ## 3. Separação entre captura e processamento
 
-Diferentes boards possuem fluxos responsáveis por capturar suas atualizações enquanto uma camada compartilhada processa as regras comuns.
+Cada board monitorado possui uma camada responsável pela captura dos eventos, enquanto as regras comuns são executadas por um fluxo compartilhado.
 
-**Benefício:** reutilização, manutenção simplificada e expansão da solução.
+```text
+Captura do Evento
+       │
+       ▼
+Fluxo específico do Board
+       │
+       ▼
+Processamento Compartilhado
+```
+
+**Benefício:** reutilização da lógica, redução de duplicidade e facilidade para expansão da solução para novos boards.
 
 ---
 
-## 4. Atualização orientada a estado
+## 4. Processamento orientado a estado
 
-A automação reage às principais transições do Work Item.
+A automação interpreta as principais transições do Work Item para determinar quais ações devem ser executadas.
 
-**Benefício:** rastreabilidade do ciclo de atendimento.
+Exemplos:
+
+```text
+New → Doing
+Doing → Done / Closed
+```
+
+Cada mudança de estado pode atualizar informações específicas da Central de Tickets e disparar as comunicações correspondentes.
+
+**Benefício:** permite acompanhar automaticamente a evolução da demanda durante seu ciclo de atendimento.
 
 ---
 
 ## 5. Atualizações incrementais
 
-Somente os dados relacionados à etapa atual são modificados.
+Durante cada etapa do ciclo, somente os campos relacionados ao evento atual são modificados.
 
-**Benefício:** preservação do histórico e menor risco de sobrescrita desnecessária.
+Informações registradas anteriormente são preservadas sempre que não fazem parte da atualização em processamento.
 
----
-
-## 6. Centralização do acompanhamento
-
-As informações operacionais relevantes são sincronizadas com a Central de Tickets.
-
-**Benefício:** criação de uma fonte estruturada para acompanhamento operacional e geração futura de indicadores.
+**Benefício:** preservação do histórico operacional e redução do risco de sobrescrita desnecessária de informações.
 
 ---
 
-# 🛠️ Tecnologias utilizadas
+## 6. Central de Tickets como fonte operacional consolidada
+
+As informações relevantes provenientes dos diferentes fluxos são sincronizadas em uma estrutura central utilizando SharePoint / Microsoft Lists.
+
+A Central de Tickets mantém dados como:
+
+- Identificação da demanda;
+- Produto;
+- Squad;
+- Área solicitante;
+- Status atual;
+- Responsável pelo atendimento;
+- Datas do ciclo de vida;
+- Urgência;
+- Referência ao Work Item;
+- Link para acesso ao card no Azure DevOps.
+
+**Benefício:** criação de uma visão centralizada e estruturada das demandas, independentemente do board responsável pelo atendimento.
+
+---
+
+## 7. Separação entre camada operacional e camada analítica
+
+O Power BI não depende diretamente dos diferentes boards do Azure DevOps para construção dos indicadores.
+
+A **Central de Tickets atua como fonte consolidada de dados**, enquanto o Power BI é responsável pela camada de modelagem e visualização.
+
+```text
+Azure DevOps
+     │
+     ▼
+Power Automate
+     │
+     ▼
+Central de Tickets
+     │
+     ▼
+Modelo Semântico
+     │
+     ▼
+Power BI
+     │
+     ▼
+Dashboard Operacional
+```
+
+Essa separação permite que a automação seja responsável pelo processamento e persistência dos dados, enquanto a camada analítica permanece focada na transformação dessas informações em indicadores.
+
+**Benefício:** menor acoplamento entre a origem transacional e a camada de visualização, além de facilitar a evolução independente do dashboard.
+
+---
+
+## 8. Modelo semântico e atualização automatizada dos indicadores
+
+Os dados consolidados na Central de Tickets são consumidos pelo modelo semântico do Power BI e utilizados na construção do dashboard operacional.
+
+A atualização dos dados é executada de forma agendada, permitindo que novos registros e alterações realizadas no processo sejam refletidos periodicamente nos indicadores.
+
+**Benefício:** acompanhamento recorrente da operação sem necessidade de consolidação manual dos dados.
+
+---
+
+# 🛠️ Tecnologias Utilizadas
 
 | Tecnologia | Utilização |
 |---|---|
-| **Microsoft Power Automate** | Orquestração e automação dos processos |
+| **Microsoft Power Automate** | Orquestração dos processos, roteamento e sincronização do ciclo de vida |
 | **Microsoft Forms** | Entrada padronizada das solicitações |
-| **SharePoint / Microsoft Lists** | Roteamento e Central de Tickets |
-| **Azure DevOps Boards** | Gestão dos Work Items |
-| **Microsoft Teams** | Comunicação com os times |
-| **Outlook** | Comunicação com os solicitantes |
-| **REST APIs** | Consulta e integração de informações |
-| **JSON** | Manipulação de payloads |
-| **OData** | Filtros e consultas |
+| **SharePoint / Microsoft Lists** | Parametrização do roteamento e persistência da Central de Tickets |
+| **Azure DevOps Boards** | Gestão e acompanhamento dos Work Items |
+| **Power BI** | Modelagem, indicadores e dashboard operacional |
+| **Microsoft Teams** | Notificação e comunicação com os times responsáveis |
+| **Outlook** | Comunicação automatizada com os solicitantes |
+| **REST APIs** | Consulta e integração de informações entre serviços |
+| **JSON** | Estruturação e manipulação de payloads |
+| **OData** | Filtros e consultas sobre dados estruturados |
 
 ---
 
-# 🧪 Validação
+# 🧪 Validação Ponta a Ponta
 
-A solução foi validada através de testes ponta a ponta envolvendo diferentes etapas do processo:
+A solução foi validada através de testes ponta a ponta, cobrindo desde a abertura da solicitação até a disponibilização dos dados para acompanhamento operacional no Power BI.
+
+Os testes contemplaram o roteamento da demanda, criação e atualização do Work Item, sincronização da Central de Tickets, notificações automáticas e atualização dos indicadores do dashboard.
 
 ```mermaid
 flowchart TD
 
-    A[Formulário] --> B[Roteamento]
+    A[Formulário] --> B[Roteamento Parametrizado]
     B --> C[Criação do Work Item]
     C --> D[Registro na Central de Tickets]
-    D --> E[Notificação do time]
+    D --> E[Notificação do Time]
 
-    E --> F[New]
-    F --> G[Doing]
+    E --> F[Status: New]
+    F --> G[Status: Doing]
 
-    G --> H[Atualização da Central]
-    H --> I[Registro de responsável e data]
-    I --> J[Notificação do solicitante]
+    G --> H[Atualização da Central de Tickets]
+    H --> I[Registro de Responsável e Data]
+    I --> J[Notificação do Solicitante]
 
-    J --> K[Done / Closed]
-    K --> L[Registro do encerramento]
+    J --> K[Status: Done / Closed]
+    K --> L[Registro do Encerramento]
+
+    L --> M[Central de Tickets Atualizada]
+    M --> N[Modelo Semântico - Power BI]
+    N --> O[Atualização dos Dados]
+    O --> P[Dashboard Operacional]
+
+    style A fill:#7719AA,color:#fff
+    style B fill:#0066FF,color:#fff
+    style C fill:#0078D4,color:#fff
+    style D fill:#038387,color:#fff
+    style E fill:#6264A7,color:#fff
+    style J fill:#6264A7,color:#fff
+    style M fill:#038387,color:#fff
+    style N fill:#F2C811,color:#000
+    style O fill:#F2C811,color:#000
+    style P fill:#F2C811,color:#000
 ```
 
 Os testes também foram utilizados durante a evolução da arquitetura para garantir que novos produtos e destinos pudessem ser incorporados sem interromper os fluxos existentes.
@@ -539,7 +694,10 @@ A implementação proporcionou:
 - ✅ Central de Tickets atualizada conforme o estado do Azure DevOps;
 - ✅ Menor acoplamento entre configuração e processamento;
 - ✅ Facilidade para incorporar novos produtos e boards;
-- ✅ Estrutura preparada para geração futura de indicadores.
+- ✅ Integração da Central de Tickets com o Power BI;
+- ✅ Dashboard operacional para acompanhamento das demandas;
+- ✅ Indicadores por status, produto, squad, urgência e área solicitante;
+- ✅ Atualização agendada dos dados através do modelo semântico.
 
 ---
 
@@ -563,55 +721,6 @@ Durante a implementação foram trabalhados diferentes cenários relacionados à
 - Evolução da solução sem interromper rotas existentes.
 
 ---
-
-# 📊 Possibilidades futuras
-
-A estrutura atual cria uma base para novas evoluções.
-
-## 🔍 Observabilidade
-
-- Registro centralizado de falhas;
-- Monitoramento das execuções;
-- Identificação de etapas com erro;
-- Estratégias de retry;
-- Reprocessamento de demandas;
-- Alertas de falha.
-
-## 📈 Indicadores
-
-A partir das datas registradas, podem ser calculadas métricas como:
-
-### Tempo até início do atendimento
-
-```text
-DataInicioAtendimento - DataAbertura
-```
-
-### Tempo total de resolução
-
-```text
-DataEncerramento - DataAbertura
-```
-
-### Tempo efetivo em atendimento
-
-```text
-DataEncerramento - DataInicioAtendimento
-```
-
-## 📊 Dashboards
-
-Os dados estruturados podem futuramente alimentar dashboards contendo:
-
-- Volume de demandas;
-- Demandas por produto;
-- Demandas por time;
-- Distribuição por status;
-- Tempo médio de atendimento;
-- Tempo médio de resolução;
-- Indicadores de SLA;
-- Taxa de demandas concluídas;
-- Evolução histórica do volume.
 
 ## 🛡️ Governança
 
